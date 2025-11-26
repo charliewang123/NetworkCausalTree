@@ -2,43 +2,45 @@
 title: 'NetworkCausalTree: An R package for heterogeneous treatment and spillover
   effects under network interference'
 tags:
-  - causal inference
-  - interference
-  - heterogeneous effects
-  - machine learning 
-authors:
-  - name: Falco J. Bargagli-Stoffi
-    orcid: 0000-0002-6131-8165
-    equal-contrib: true
-    affiliation: "1"
-  - name: Costanza Tortù
-    orcid: 0000-0003-2561-9726
-    equal-contrib: true
-    affiliation: "2"
-  - name: Riccardo Cadei
-    orcid: 0000-0003-2416-8943
-    affiliation: "3"
-  - name: Charlie Wang
-    orcid: 0009-0003-1672-0774
-    affiliation: "4"
-  - name: Laura Forastiere
-    orcid: 0000-0003-3721-9826
-    affiliation: "5"
-affiliations:
- - name: Department of Biostatistics, UCLA School of Public Health
-   index: 1
- - name: Bank of Italy and Sant'Anna School for Advanced Studies
-   index: 2
- - name: Department of Biostatistics, Harvard T.H. Chan School of Public Health
-   index: 3
- - name: Department of Statistics and Data Science, University of California, Los Angeles, USA
-   index: 4
- - name: Department of Biostatistics, Yale School of Public Health
-   index: 5
+- causal inference
+- interference
+- heterogeneous effects
+- machine learning
+date: "01 January 2026"
+output: pdf_document
 corresponding:
-  - name: Falco J. Bargagli-Stoffi
-    email: falco@ucla.edu
-date: 01 January 2026
+- name: "Falco J. Bargagli-Stoffi"
+  email: falco@ucla.edu
+authors:
+- name: "Falco J. Bargagli-Stoffi"
+  orcid: "0000-0002-6131-8165"
+  equal-contrib: true
+  affiliation: '1'
+- name: Costanza Tortù
+  orcid: "0000-0003-2561-9726"
+  equal-contrib: true
+  affiliation: '2'
+- name: Riccardo Cadei
+  orcid: "0000-0003-2416-8943"
+  affiliation: '3'
+- name: Charlie Wang
+  orcid: "0009-0003-1672-0774"
+  affiliation: '4'
+- name: Laura Forastiere
+  orcid: "0000-0003-3721-9826"
+  affiliation: '5'
+affiliations:
+- name: Department of Biostatistics, UCLA School of Public Health
+  index: 1
+- name: Bank of Italy and Sant'Anna School for Advanced Studies
+  index: 2
+- name: Department of Biostatistics, Harvard T.H. Chan School of Public Health
+  index: 3
+- name: Department of Statistics and Data Science, University of California, Los Angeles,
+    USA
+  index: 4
+- name: Department of Biostatistics, Yale School of Public Health
+  index: 5
 ---
 
 # Summary
