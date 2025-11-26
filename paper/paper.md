@@ -207,4 +207,3 @@ Future extensions will include support for continuous exposures (e.g., multiple 
 This work was supported by the Alfred P. Sloan Foundation Grant G-2020-13946 for the development of *Causal Inference with Complex Treatment Regimes: Design, Identification, Estimation, and Heterogeneity* and the Harvard Data Science Initiative Postdoctoral Research Fund Award.
 
 # References
-
