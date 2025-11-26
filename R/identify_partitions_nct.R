@@ -41,47 +41,29 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
   # Initialize
   data_tree <- data.frame(idunit = 1:N, W = W, G = G, Y = Y)
   data_tree <- cbind(data_tree, as.data.frame(X))
-  colnames(data_tree)[5:ncol(data_tree)] <- paste0("X.", 1:ncol(X))
-  
   do_splits <- TRUE
   total_variance = NULL
   
   # Create output dataset
-  tree_info <- data.frame(
-    NODE = 1,
-    OF = 0,
-    NOBS = nrow(data_tree),
-    FILTER = NA,
-    TERMINAL = "SPLIT",
-    DEPTH = 0,
-    stringsAsFactors = FALSE
-  )
+  tree_info <- data.frame(NODE = 1, OF = 0, NOBS = nrow(data_tree),
+                          FILTER = NA, TERMINAL = "SPLIT",
+                          stringsAsFactors = FALSE)
   
   # Recursively split the sample until one stopping criterion is met
   while (do_splits) {
     to_calculate <- which(tree_info$TERMINAL == "SPLIT")
-    
-    # Loop through every node
+    # loop through every node
     for (j in to_calculate) {
-      
-      # Extract that node's subset of data
+      # extract that node's subset of data
       if (!is.na(tree_info[j, "FILTER"])) {
         texts = tree_info[j, "FILTER"]
-
-        texts <- gsub("\\bNA\\s*&\\s*", "", texts)
-        texts <- gsub("\\bNA\\b", "", texts)
-        texts <- gsub("&\\s*&", "&", texts)
-        texts <- gsub("^&\\s*", "", texts)
-        texts <- gsub("\\s*&$", "", texts)
-        texts <- trimws(texts)
-        
         this_data <- subset(data_tree, eval(parse(text = texts)))
-        } else {this_data <- data_tree}
+      } else {this_data <- data_tree}
       
-      # Number of nodes
+      # number of nodes
       nleafs = nrow(tree_info)
       
-      # Find the best split for this node
+      # find the best split for this node
       splitting <- compute_OF_Split( method = method, alpha = alpha, beta = beta,
                                      gamma = gamma, delta = delta,
                                      N = nrow(this_data), W = this_data$W,
@@ -93,13 +75,12 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
                                      nleafs = nleafs, total_variance = total_variance)
       
       if (any(is.na(splitting))) {
-        
-        # Node becomes a leaf
+        # node becomes a leaf
         split_here <- rep(FALSE, 2)
         
       } else {
         
-        # Extract split info
+        # extract split info
         maxof <- as.numeric(splitting[1])
         mn <- max(tree_info$NODE)
         
@@ -110,6 +91,7 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
         )
       }
       
+      
       # Check if the current splitting rule has already been used
       split_here  <- !sapply(tmp_filter,
                              FUN = function(x, y)
@@ -119,62 +101,66 @@ identify_partitions_nct <- function(method, alpha, beta, gamma,
       # Append splitting rules
       if (!is.na(tree_info[j, "FILTER"])) {
         tmp_filter  <- paste(tree_info[j, "FILTER"],
-                             tmp_filter, sep = " & ")
-        tmp_filter <- gsub("\\bNA\\s*&\\s*", "", tmp_filter)
-        tmp_filter <- gsub("\\bNA\\b", "", tmp_filter)
-        tmp_filter <- gsub("&\\s*&", "&", tmp_filter)
-        tmp_filter <- gsub("^&\\s*", "", tmp_filter)
-        tmp_filter <- gsub("\\s*&$", "", tmp_filter)
-        tmp_filter <- trimws(tmp_filter)
-        }
+                             tmp_filter, sep = " & ") }
       
       # Check the number of observations in the current node
-      tmp_nobs <- sapply(tmp_filter, FUN = function(filt, x){
-        
-        filt <- gsub("\\bNA\\s*&\\s*", "", filt)
-        filt <- gsub("\\bNA\\b", "", filt)
-        filt <- gsub("&\\s*&", "&", filt)
-        filt <- gsub("^&\\s*", "", filt)
-        filt <- gsub("\\s*&$", "", filt)
-        filt <- trimws(filt)
-        
-        nrow(subset(x, eval(parse(text = filt))))
-      }, x = this_data)
-
-      # Check minsize for each child node
-      tmp_child_ok <- sapply(tmp_filter, function(filt) {
-        this_child <- subset(this_data, eval(parse(text = filt)))
-
-        if (nrow(this_child) == 0) return(FALSE)
-        min(table(this_child$W, this_child$G)) >= minsize
-      })
+      tmp_nobs <- sapply(tmp_filter,
+                         FUN = function(i, x){
+                           nrow(subset(x = x, subset = eval(parse(text = i))))} ,
+                         x = this_data)
       
-      # Check both child nodes are valid
-      if (!all(tmp_child_ok)) {
+      
+      # STOP if insufficient minimum number of observations in the leafs
+      if (any(as.numeric(table(this_data$W, this_data$G)) < minsize)) {
         split_here <- rep(FALSE, 2)
       }
+      
       
       # STOP if exceeded depth
-      if (tree_info[j, "DEPTH"] >= depth) {
+      depth_tree <- as.numeric(stringi::stri_count_regex(tree_info[j, "FILTER"], "X\\."))
+      if (depth_tree >= depth & !is.na(depth_tree)) {
         split_here <- rep(FALSE, 2)
       }
       
-      # Create children dataset
-      children <- data.frame(
-        NODE = c(mn + 1, mn + 2),
-        OF = c(rep(maxof,2)),
-        NOBS = tmp_nobs,
-        FILTER = tmp_filter,
-        TERMINAL = rep("SPLIT", 2),
-        DEPTH = tree_info[j, "DEPTH"] + 1,
-        row.names = NULL
-      )[split_here, ]
       
-      # Update the tree
-      tree_info[j, "TERMINAL"] <- ifelse(all(!split_here), "LEAF", "PARENT")
+      
+      # Create children dataset
+      children <- data.frame(NODE = c(mn + 1, mn + 2),
+                             OF = c(rep(maxof,2)),
+                             NOBS = tmp_nobs,
+                             FILTER = tmp_filter,
+                             TERMINAL = rep("SPLIT", 2),
+                             row.names = NULL) [split_here,]
+      
+      if (method=="penalized") {
+        
+        variance_children = alpha*(Vartau1000(N = nrow(this_data), W = this_data$W,
+                                              Y = this_data$Y, G = this_data$G,
+                                              p = p[this_data$idunit], Ne = Ne[this_data$idunit],
+                                              Ne_list = Ne_list[this_data$idunit])) +
+          beta*(Vartau1101(N = nrow(this_data), W = this_data$W,
+                           Y = this_data$Y, G = this_data$G,
+                           p = p[this_data$idunit], Ne = Ne[this_data$idunit],
+                           Ne_list = Ne_list[this_data$idunit])) +
+          gamma*(Vartau1110(N = nrow(this_data), W = this_data$W,
+                            Y = this_data$Y, G = this_data$G,
+                            p = p[this_data$idunit], Ne = Ne[this_data$idunit],
+                            Ne_list = Ne_list[this_data$idunit])) +
+          delta*(Vartau0100(N = nrow(this_data), W = this_data$W,
+                            Y = this_data$Y, G = this_data$G,
+                            p = p[this_data$idunit], Ne = Ne[this_data$idunit],
+                            Ne_list = Ne_list[this_data$idunit]))
+        
+        total_variance = c(total_variance, variance_children)
+        
+      }
+      
+      # update the tree
+      tree_info[j, "TERMINAL"] <- ifelse(all(!split_here), "LEAF", "SPLIT")
       tree_info <- rbind(tree_info, children)
       do_splits <- !all(tree_info$TERMINAL != "SPLIT")
     }
+    
   }
   
   return(tree = tree_info)
