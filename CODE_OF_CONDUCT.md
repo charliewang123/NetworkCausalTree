@@ -49,7 +49,7 @@ Project maintainers have the right and responsibility to remove, edit, or reject
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the project maintainers at:
 
-**[Your contact email or GitHub username]**
+**falco@ucla.edu**
 
 All complaints will be reviewed and investigated promptly and fairly. All project maintainers are obligated to respect the privacy and security of the reporter of any incident.
 
@@ -113,4 +113,4 @@ If you have questions about this Code of Conduct, please open an issue on GitHub
 
 ---
 
-**Last updated**: December 2024
+**Last updated**: December 2025
