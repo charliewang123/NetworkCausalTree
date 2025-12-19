@@ -16,10 +16,10 @@ NetworkCausalTree is implemented in R and follows standard R development
 conventions. Before contributing, please:
 
 1.  Read our [Code of
-    Conduct](https://github.com/charliewang123/NetworkCausalTree/CODE_OF_CONDUCT.md)
+    Conduct](https://github.com/charliewang123/NetworkCausalTree/CODE_OF_CONDUCT.md)\
 2.  Check the [GitHub
     Issues](https://github.com/charliewang123/NetworkCausalTree/issues)
-    page for existing issues or feature requests
+    page for existing issues or feature requests\
 3.  Review the package documentation and vignettes to understand the
     current functionality
 
@@ -29,19 +29,21 @@ We welcome various types of contributions:
 
 ### Bug Reports
 
-If you find a bug, please report it by: 1. Opening a new issue on our
-[GitHub
+If you find a bug, please report it by:\
+1. Opening a new issue on our [GitHub
 Issues](https://github.com/charliewang123/NetworkCausalTree/issues) page
-2. Including a clear title and description 3. Providing a minimal
-reproducible example 4. Specifying your R version, operating system, and
-package version 5. Describing the expected vs. actual behavior
+2. Including a clear title and description\
+3. Providing a minimal reproducible example\
+4. Specifying your R version, operating system, and package version\
+5. Describing the expected vs. actual behavior
 
 ### Feature Requests
 
 Have an idea for a new feature? We'd love to hear it! Please: 1. Check
-if a similar request already exists in the Issues 2. Open a new issue
-with the "enhancement" label 3. Clearly describe the feature and its
-potential use cases 4. Explain how it would benefit users of the package
+if a similar request already exists in the Issues\
+2. Open a new issue with the "enhancement" label\
+3. Clearly describe the feature and its potential use cases\
+4. Explain how it would benefit users of the package
 
 ### Code Contributions
 
@@ -144,12 +146,11 @@ guidelines:
 
 ### Function Documentation
 
-All exported functions must include roxygen2 documentation with: 
-- `@title` and `@description`     
-- `@param` for each parameter 
-- `@return` describing the return value      
-- `@examples` showing usage 
-- `@export` if the function should be user-facing     
+All exported functions must include roxygen2 documentation with: -
+`@title` and `@description`\
+- `@param` for each parameter - `@return` describing the return value\
+- `@examples` showing usage - `@export` if the function should be
+user-facing
 
 Example:
 
@@ -223,10 +224,10 @@ If you have questions or need support:
 
 ## Recognition
 
-Contributors will be acknowledged in: 
-- The package DESCRIPTION file (for significant contributions)       
-- Release notes       
-- The project README       
+Contributors will be acknowledged in: - The package DESCRIPTION file
+(for significant contributions)\
+- Release notes\
+- The project README
 
 ## License
 
