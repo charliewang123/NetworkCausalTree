@@ -85,8 +85,10 @@ $$
 \frac{1}{N(l(\mathbf{x}))}
 \sum_{k=1}^K \sum_{i=1}^{n_k}
 Y_{ik}(w,g)\, I(\mathbf{X}_{ik} \in l(\mathbf{x}))
--
-\frac{1}{N(l(\mathbf{x}))}
+$$
+
+$$
+-\frac{1}{N(l(\mathbf{x}))}
 \sum_{k=1}^K \sum_{i=1}^{n_k}
 Y_{ik}(w',g')\, I(\mathbf{X}_{ik} \in l(\mathbf{x}))
 $$
@@ -166,7 +168,7 @@ The results are included in a `data.frame` object which provides information abo
 For instance, Figure 1 shows the tree obtained from **Example 1**. The code used to produce the plot is as follows:
 
 ``` r
-title <- expression(paste("CAUSAL TREE TARGETED TO ",tau,"(1,0;0,0)"),sep="")
+title <- expression(paste("CAUSAL TREE TARGETED TO",tau,"(1,0;0,0)"),sep="")
 cov_names <- colnames(dataset[["X"]])
 
 plot_NCT(NCT = result, 
