@@ -1,6 +1,6 @@
 ---
-title: 'NetworkCausalTree: An R package for heterogeneous treatment and spillover
-  effects under network interference'
+title: 'NetworkCausalTree: An R Package for Heterogeneous Treatment and Spillover
+  Effects under Network Interference'
 tags:
 - causal inference
 - interference
@@ -52,7 +52,7 @@ To integrate the aforementioned two topics in the field of causal inference, @ba
 
 This paper introduces the `NetworkCausalTree` R package, the first open-source implementation of a decision-tree method for estimating heterogeneous treatment and spillover effects under clustered network interference. All analyses and figures in this paper can be reproduced using the scripts and example data provided in the package’s GitHub repository.
 
-# Statement of need
+# Statement of Need
 
 Existing R packages and algorithms are designed either to detect and estimate Heterogeneous Treatment Effects (HTEs) in the absence of interference or to estimate average causal effects in the presence of interference.
 
@@ -195,11 +195,11 @@ In this example, the most important heterogeneity driver is `x1`. The estimated 
 
 Online documentation for the package can be found at [fbargaglistoffi/NetworkCausalTree](https://github.com/fbargaglistoffi/NetworkCausalTree).
 
-# Reproducibility and dependencies
+# Reproducibility and Dependencies
 
 All examples in this paper can be reproduced using the scripts provided in the `tests/examples/` directory of the package’s GitHub repository. The package relies solely on standard R libraries, which are automatically installed and loaded upon installation of `NetworkCausalTree`. Numerical stability and reproducibility have been validated through extensive simulation studies and example analyses across multiple systems. **The package passes all standard R CMD check tests without errors or warnings, confirming full compliance with CRAN submission standards.**
 
-# Implementation and future work
+# Implementation and Future Work
 
 This package is implemented in R and follows standard R development conventions, ensuring compatibility across systems. The GitHub repository provides detailed vignettes and example scripts to facilitate reproducibility. Community engagement is encouraged through documented contribution guidelines ([`CONTRIBUTING.md`](https://github.com/charliewang123/NetworkCausalTree/blob/master/CODE_OF_CONDUCT.md)) and a code of conduct ([`CODE_OF_CONDUCT.md`](https://github.com/charliewang123/NetworkCausalTree/blob/master/CODE_OF_CONDUCT.md)). Users can report issues or request support through the GitHub Issues page.
 
@@ -207,6 +207,6 @@ Future extensions will include support for continuous exposures (e.g., multiple 
 
 # Acknowledgements
 
-This work was supported by the Alfred P. Sloan Foundation Grant G-2020-13946 for the development of *Causal Inference with Complex Treatment Regimes: Design, Identification, Estimation, and Heterogeneity* and the Harvard Data Science Initiative Postdoctoral Research Fund Award.
+This work was supported by the Amazon Web Services (AWS) grant on *AI/ML for Identifying Social Determinants of Health*, the Alfred P. Sloan Foundation Grant G-2020-13946 for the development of *Causal Inference with Complex Treatment Regimes: Design, Identification, Estimation, and Heterogeneity* and the Harvard Data Science Initiative Postdoctoral Research Fund Award.
 
 # References
