@@ -8,6 +8,7 @@ tags:
 - machine learning
 date: "01 January 2026"
 output: pdf_document
+bibliography: paper.bib
 corresponding:
 - name: "Falco J. Bargagli-Stoffi"
   email: falco@ucla.edu
