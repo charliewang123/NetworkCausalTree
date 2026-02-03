@@ -84,8 +84,10 @@ $$
 \frac{1}{N(l(\mathbf{x}))}
 \sum_{k=1}^K \sum_{i=1}^{n_k}
 Y_{ik}(w,g)\, I(\mathbf{X}_{ik} \in l(\mathbf{x}))
--
-\frac{1}{N(l(\mathbf{x}))}
+$$
+
+$$
+-\frac{1}{N(l(\mathbf{x}))}
 \sum_{k=1}^K \sum_{i=1}^{n_k}
 Y_{ik}(w',g')\, I(\mathbf{X}_{ik} \in l(\mathbf{x}))
 $$
