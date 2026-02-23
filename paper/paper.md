@@ -1,14 +1,13 @@
 ---
-title: 'NetworkCausalTree: An R Package for Heterogeneous Treatment and Spillover
-  Effects under Network Interference'
+title: 'NetworkCausalTree: An R package for heterogeneous treatment and spillover
+  effects under network interference'
 tags:
 - causal inference
 - interference
 - heterogeneous effects
 - machine learning
-date: "01 February 2026"
+date: "01 January 2026"
 output: pdf_document
-bibliography: paper.bib
 corresponding:
 - name: "Falco J. Bargagli-Stoffi"
   email: falco@ucla.edu
@@ -48,11 +47,11 @@ affiliations:
 
 Interference occurs when treatment assigned to one unit influences the outcomes of other units [@cox1958planning]. In the realm of policy interventions, interference can manifest through various interactions, encompassing social, physical, or virtual connections. The conventional Rubin Causal Model, employed in causal inference studies [@rubin1986comment], excludes interference. However, when interference is present, it must be taken into account to prevent a biased estimation of the treatment effect [@forastiere2016identification] and to be able to estimate spillover effects, that is, the effects on a unit's outcome of the treatment received by other units. Consequently, recent research has devised new methodologies to tackle interference on networks [@forastiere2016identification; @aronow2017estimating; @athey2018exact; @leung2020treatment]. Concurrently, alongside the interference research domain, scholars have crafted machine learning algorithms to appraise treatment effect heterogeneity with respect to individual characteristics [@athey2016recursive]. These algorithms identify heterogeneous sub-populations by iteratively segregating groups whose estimate conditional average treatment effect differs the most from others, and enabling researchers to understand which sub-populations are particularly responsive to the treatment.
 
-To integrate the aforementioned two topics in the field of causal inference, @bargagli2025heterogeneous introduces a novel machine learning algorithm, named Network Causal Tree (NCT), that explores the heterogeneity of treatment and spillover effects concerning individual, neighborhood, and network characteristics within randomized settings. Evaluating the heterogeneity of treatment and spillover effect is crucial for identifying both those sub-populations who are responsive to the treatment they received and those who are highly susceptible to the treatment received by other units. Heterogeneity exploration is performed via an interpretable decision tree algorithm. Decision trees provide high levels of interpretability by offering transparent insights into the relationships in the data that are learned by the model [@murdoch2019definitions]. By recursively partitioning the data via decision rules, decision trees transform complex data patterns into an intelligible series of *if-then* decision rules. NCT is designed to operate within clustered neighborhood interference (CNI), where units are partitioned into distinct clusters, spillover mechanisms exclusively take place within clusters based on the links of a cluster-specific network and units are assumed to receive an indirect exposure to the intervention if they have at least one treated peer within their immediate neighbors. The estimation of conditional effects is carried out using an extended version of the Horvitz-Thompson estimator [@aronow2017estimating], tailored to accommodate clustered network interference. `NetworkCausalTree` is an R Package providing a flexible implementation of the Network Causal Tree algorithm.
+To integrate the aforementioned two topics in the field of causal inference, @bargagli2024heterogeneous introduces a novel machine learning algorithm, named Network Causal Tree (NCT), that explores the heterogeneity of treatment and spillover effects concerning individual, neighborhood, and network characteristics within randomized settings. Evaluating the heterogeneity of treatment and spillover effect is crucial for identifying both those sub-populations who are responsive to the treatment they received and those who are highly susceptible to the treatment received by other units. Heterogeneity exploration is performed via an interpretable decision tree algorithm. Decision trees provide high levels of interpretability by offering transparent insights into the relationships in the data that are learned by the model [@murdoch2019definitions]. By recursively partitioning the data via decision rules, decision trees transform complex data patterns into an intelligible series of *if-then* decision rules. NCT is designed to operate within clustered neighborhood interference (CNI), where units are partitioned into distinct clusters, spillover mechanisms exclusively take place within clusters based on the links of a cluster-specific network and units are assumed to receive an indirect exposure to the intervention if they have at least one treated peer within their immediate neighbors. The estimation of conditional effects is carried out using an extended version of the Horvitz-Thompson estimator [@aronow2017estimating], tailored to accommodate clustered network interference. `NetworkCausalTree` is an R Package providing a flexible implementation of the Network Causal Tree algorithm.
 
 This paper introduces the `NetworkCausalTree` R package, the first open-source implementation of a decision-tree method for estimating heterogeneous treatment and spillover effects under clustered network interference. All analyses and figures in this paper can be reproduced using the scripts and example data provided in the package’s GitHub repository.
 
-# Statement of Need
+# Statement of need
 
 Existing R packages and algorithms are designed either to detect and estimate Heterogeneous Treatment Effects (HTEs) in the absence of interference or to estimate average causal effects in the presence of interference.
 
@@ -112,7 +111,7 @@ library(devtools)
 install_github("fbargaglistoffi/NetworkCausalTree", ref="master")
 ```
 
-`data_generator()` is a flexible synthetic dataset generator, which can be used for simulations before applying `NetworkCausalTree` to real-world data sets. It returns a CNI environment, where cluster-specific networks are generated either using the Erdos-Renyi model [@erdos1959random], the Barabasi-Albert [@barabasi1999emergence], or the exponential random graph model [@lusher2013exponential]. To generate synthetic data, the user has to specify the sample size (`N`), the number of clusters (`m`), the number of covariates (`K`), the vector collecting individual treatment assignment probabilities (`p`), the simulated size of the main treatment effect $\tau_{(1,0;0,0)}$ (`h`), the parameter that specifies whether treatment heterogeneity is present in the data (`het`) (if this parameter is TRUE the function introduces treatment heterogeneity with respect to the first regressor in the dataset such that $\tau_{(1,0;0,0)}  = h$ if $x1=0$ and $\tau_{(1,0;0,0)}  = - h$ if $x1 = 1$ , the method employed to generate the cluster-specific networks (`method_networks`), and its required parameters---here, since networks are generated according to the Erdos-Renyi model (`method_networks = er`)---, parameters are specified using `param_er` the option.
+`data_generator()` is a flexible synthetic dataset generator, which can be used for simulations before applying `NetworkCausalTree` to real-world data sets. It returns a CNI environment, where cluster-specific networks are generated either using the Erdos-Renyi model [@erdos1959random], the Barabasi-Albert [@barabasi1999emergence], or the exponential random graph model [@lusher2013exponential]. To generate synthetic data, the user has to specify the sample size (`N`), the number of clusters (`M`), the number of covariates (`k`), the vector collecting individual treatment assignment probabilities (`p`), the parameter that specifies whether treatment heterogeneity is present in the data (`het`) (if this parameter is TRUE the function introduces treatment heterogeneity with respect to the first regressor in the dataset such that $\tau_{(1,0;0,0)}  = h$ if $x1=0$ and $\tau_{(1,0;0,0)}  = - h$ if $x1 = 1$ , the simulated size of the main treatment effect $\tau_{(1,0;0,0)}$ (`h`), the method employed to generate the cluster-specific networks (`method_networks`), and its required parameters---here, since networks are generated according to the Erdos-Renyi model (`method_networks = er`)---, parameters are specified using `param_er` the option.
 
 The `data_generator()` function returns as output a list of synthetic data including the covariates matrix (`X`), the outcome vector (`Y`), the individual intervention vector (`W`), the adjacency matrix (`A`), the neighborhood intervention vector (`G`), the group membership vector (`K`) and the vector describing the probability to be assigned to the active individual intervention vector (`p`).
 
@@ -168,7 +167,7 @@ The results are included in a `data.frame` object which provides information abo
 For instance, Figure 1 shows the tree obtained from **Example 1**. The code used to produce the plot is as follows:
 
 ``` r
-title <- expression(paste("CAUSAL TREE TARGETED TO",tau,"(1,0;0,0)"),sep="")
+title <- expression(paste("CAUSAL TREE TARGETED TO ",tau,"(1,0;0,0)"),sep="")
 cov_names <- colnames(dataset[["X"]])
 
 plot_NCT(NCT = result, 
@@ -191,15 +190,15 @@ plot_NCT(NCT = result,
 
 ![Network Causal Tree targeted to all effects](images/nct2.png)
 
-In this example, the most important heterogeneity driver is `x1`. The estimated main treatment effect is strongly positive and close to 2 if if $x1 = 0$, while it is strongly negative and close to -2 for $x1 = 1$ (note that this result is coherent with respect to the previous definition of the parameters related to the `data_generator()` function, `h = 2` and `het = TRUE`)
+In these examples, the most important heterogeneity driver is `x1`. The estimated main treatment effect is strongly positive and close to 2 if if $x1 = 0$, while it is strongly negative and close to -2 for $x1 = 1$ (note that this result is coherent with respect to the previous definition of the parameters related to the `data_generator()` function, `h = 2` and `het = TRUE`)
 
 Online documentation for the package can be found at [fbargaglistoffi/NetworkCausalTree](https://github.com/fbargaglistoffi/NetworkCausalTree).
 
-# Reproducibility and Dependencies
+# Reproducibility and dependencies
 
 All examples in this paper can be reproduced using the scripts provided in the `tests/examples/` directory of the package’s GitHub repository. The package relies solely on standard R libraries, which are automatically installed and loaded upon installation of `NetworkCausalTree`. Numerical stability and reproducibility have been validated through extensive simulation studies and example analyses across multiple systems. **The package passes all standard R CMD check tests without errors or warnings, confirming full compliance with CRAN submission standards.**
 
-# Implementation and Future Work
+# Implementation and future work
 
 This package is implemented in R and follows standard R development conventions, ensuring compatibility across systems. The GitHub repository provides detailed vignettes and example scripts to facilitate reproducibility. Community engagement is encouraged through documented contribution guidelines ([`CONTRIBUTING.md`](https://github.com/charliewang123/NetworkCausalTree/blob/master/CODE_OF_CONDUCT.md)) and a code of conduct ([`CODE_OF_CONDUCT.md`](https://github.com/charliewang123/NetworkCausalTree/blob/master/CODE_OF_CONDUCT.md)). Users can report issues or request support through the GitHub Issues page.
 
@@ -207,6 +206,6 @@ Future extensions will include support for continuous exposures (e.g., multiple 
 
 # Acknowledgements
 
-This work was supported by the Amazon Web Services (AWS) grant on *AI/ML for Identifying Social Determinants of Health*, the Alfred P. Sloan Foundation Grant G-2020-13946 for the development of *Causal Inference with Complex Treatment Regimes: Design, Identification, Estimation, and Heterogeneity* and the Harvard Data Science Initiative Postdoctoral Research Fund Award.
+This work was supported by the Alfred P. Sloan Foundation Grant G-2020-13946 for the development of *Causal Inference with Complex Treatment Regimes: Design, Identification, Estimation, and Heterogeneity* and the Harvard Data Science Initiative Postdoctoral Research Fund Award.
 
 # References
