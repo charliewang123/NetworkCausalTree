@@ -1,4 +1,4 @@
-#' @title
+#' @title 
 #' Network Causal Tree
 
 #' @description
@@ -18,7 +18,7 @@
 #' neighborhood treatment, with the individual treatment set at 0).
 #' @param A N x N Adjacency matrix.
 #' @param K N x 1 Cluster Membership vector.
-#' @param p  N x 1 Probability to be assigned to the active individual
+#' @param p N x 1 Probability to be assigned to the active individual
 #' intervention vector.
 #' @param ratio_disc Ratio of clusters to be assigned to the discovery set only.
 #' @param minsize Minimum number of observaztions for each level of the joint
@@ -48,87 +48,93 @@
 #' - `SETAU1110_EST`: estimated std. error of the 1110 effect in the partition,
 #' - `SETAU0100_EST`: estimated std. error of the 0100 effect in the partition.
 #'
-#' @import stringi
-#' @import statnet
-#' @import network
-#' @import ergm
-#' @import plyr
-#' @import stats
-#'
+#' @importFrom dplyr rename mutate summarise filter arrange count desc lag groups
+#' @importFrom igraph graph_from_data_frame V E
+#' @importFrom network add.vertices add.edges delete.vertices delete.edges
+#' @importFrom network get.vertex.attribute get.edge.attribute set.edge.attribute
+#' @importFrom network list.edge.attributes list.vertex.attributes "%v%<-"
+#' @importFrom stats decompose spectrum rnorm runif na.omit rbinom
+#' @importFrom stringi stri_detect_fixed
+#' @importFrom data.tree Node
+#' 
 #' @export
 
 
 
 NetworkCausalTree <- function(X, Y, W,
-                               effect_weights = c(1,0,0,0),
-                               A = NULL,
-                               K = NULL,
-                               p = NULL,
-                               ratio_disc,
-                               depth = 3,
-                               minsize = 10,
-                               method = "singular",
-                               output = "estimation"){
+                              effect_weights = c(1,0,0,0),
+                              A = NULL,
+                              K = NULL,
+                              p = NULL,
+                              ratio_disc,
+                              depth = 3,
+                              minsize = 10,
+                              method = "singular",
+                              output = "estimation"){
 
-  # compute sample size and number of clusters
+  # Compute sample size and number of clusters
   N <- length(W)
   k <- length(unique(K))
 
-  # get effects - specific input weights
+  # Get effects - specific input weights
   alpha <- effect_weights[1]
   beta <- effect_weights[2]
   gamma <- effect_weights[3]
   delta <- effect_weights[4]
 
-  # check the validity of input parameters
+  # Check the validity of input parameters
   if (alpha + beta + gamma + delta != 1) {
     stop('Effect weights (effect_weights) must sum up to one.')
   }
 
+  # If method = "singular" or "penalized," there should be one effect
   if ((length(which(effect_weights > 0)) > 1) & (method == "singular" | method == "penalized")) {
     stop('If method is set to singular or penalized only one effect should have positive weight.')
   }
 
+  # If method = "composite," there should be at least two effects
   if (1 %in% effect_weights & method == "composite") {
     stop('Composite objective function is computed if at least two effects are investigated.')
   }
 
+  # Check if there is an adjacency matrix present
   if (is.null(A)) {
-    stop('You have to specify the Adiacency Matrix A.')
+    stop('You have to specify the Adjacency Matrix A.')
   }
 
+  # Ratio of clusters assigned to discovery set needs to be within boundaries
   if (ratio_disc <= 0 | ratio_disc > 1) {
     stop('The ratio of clusters to be assigned to the discovery set must be above 0 and below 1')
   }
 
-  # compute network - specific information (the degree Ne, the number of treated friends Ne_treated,
-  # the value of the neighborhood exposure G and the list of direct neighbors Ne_list)
+  # Compute network - specific information (the degree Ne, the number of treated friends Ne_treated,
+  # The value of the neighborhood exposure G and the list of direct neighbors Ne_list)
 
-    Ne <- rowSums(A)
-    Ne_treated <- as.vector(A %*% W)
-    G = rep(1,N)
-    G[Ne_treated == 0] <- 0
-    Ne_list <- vector(mode = "list", length = N)
+  Ne <- rowSums(A)
+  Ne_treated <- as.vector(A %*% W)
+  G = rep(1,N)
+  G[Ne_treated == 0] <- 0
+  Ne_list <- vector(mode = "list", length = N)
 
   for (i in  1:N) {
     Ne_list[[i]] <- which(A[i,] > 0)
   }
 
-  # compute the estimated effects in the whole population
-  population_effects <- compute_population_effects(N = N, 
+  # Compute the estimated effects in the whole population
+  population_effects <- compute_population_effects(N = N,
                                                    W = W,
                                                    G = G,
-                                                   Y = Y, 
-                                                   p = p, 
+                                                   Y = Y,
+                                                   p = p,
                                                    Ne = Ne)
 
-  # sample the clusters to be assigned to the discovery set
+  # Sample the clusters to be assigned to the discovery set
   nclusters_disc = round(k * ratio_disc)
   clusters_disc <- sample(1 : k,
-                          size = nclusters_disc, 
+                          size = nclusters_disc,
                           replace = FALSE)
 
-  # generate the tree on the discovery set
+  # Generate the tree on the discovery set
   tree <- sprout_nct(method = method,
                      sampled_clusters = clusters_disc,
                      depth = depth,
@@ -149,7 +155,7 @@ NetworkCausalTree <- function(X, Y, W,
                      Ne_list = Ne_list)
 
 
-  # organize the tree object
+  # Organize the tree object
   final_partition <- data.frame(OF = tree$OF,
                                 FILTER =  c("NA", as.vector(na.omit(unique(tree$FILTER)))),
                                 TERMINAL = tree$TERMINAL,
@@ -157,7 +163,7 @@ NetworkCausalTree <- function(X, Y, W,
                                 stringsAsFactors = FALSE)
 
 
-  # compute the estimates on the partitions generated by the tree
+  # Compute the estimates on the partitions generated by the tree
   final_partition_with_estimates <- compute_effects_nct(output = output,
                                                         nct_partition = final_partition,
                                                         N = N,
