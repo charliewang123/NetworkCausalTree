@@ -9,11 +9,11 @@
 #' @param  k Number of clusters (default: 40).
 #' @param  p  N x 1 vector, Probability to be assigned to the active individual
 #' intervention (default: rep(0.2,2000))
-#' @param h Absolute value of the treatment effects 1000 and 1101
-#' (default: 2).
 #' @param het TRUE if the treatment effects 1000 and 1101 are heterogeneous with
 #' respect to the first regressor (h with X1=0, -taui with X0=0), FALSE if
 #' constant (-h) (default: TRUE).
+#' @param h Absolute value of the treatment effects 1000 and 1101
+#' (default: 2).
 #' @param  method_networks Method to generate the m networks:
 #' "ergm" (Exponential Random Graph Models), "er" (Erdos Renyi), "sf"
 #' (Barabasi-Albert model) (default: "er").
@@ -21,8 +21,8 @@
 #' @param  param_er Probability of the "er" model, if used (default: 0.2).
 #' @param  coef_ergm Coefficients of the "ergm" model, if used (default: NULL).
 #' @param  var_homophily_ergm Variable to account for homophily in the "ergm"
-#' @param remove_isolates Logical; remove isolated nodes? (default TRUE)
 #' model (default: NULL).
+#' @param remove_isolates Logical; remove isolated nodes? (default TRUE)
 #'
 #' @return A list of synthetic data containing:
 #' - NxM covariates matrix (`X`).
@@ -42,10 +42,10 @@ data_generator = function(N = 2000,
                           M = 5,
                           k = 40,
                           p = rep(0.2,2000),
-                          h = 2,
                           het = TRUE,
+                          h = 2,
                           method_networks = "er",
-                          param_er = 0.2,
+                          param_er = 0.1,
                           coef_ergm = NULL,
                           var_homophily_ergm = NULL,
                           remove_isolates = TRUE){
@@ -91,9 +91,8 @@ data_generator = function(N = 2000,
   G = rep(1, N)
   G[Ne_treated == 0] <- 0
 
-
-
-  if (remove_isolates) {
+  if(remove_isolates){
+    # Remove isolates
     W <- W[Ne > 0]
     G <- G[Ne > 0]
     K <- as.numeric(K[Ne > 0])
@@ -104,7 +103,6 @@ data_generator = function(N = 2000,
   }
 
   # Generate Potential Outcomes
-  # effect size depends on first covariate
   if (het) {
     x1 <- X[,1]
     tau <- rep(0, N)
