@@ -6,10 +6,10 @@
 #'
 #' @param  k Number of clusters
 #' @param  N Number of units
-#' @param X N x M Observed Covariates Matrix.
+#' @param X N x M Observed Covariates Matrix
 #' @param  method_networks method to generate the k networks: "ergm" (Exponential Random Graph Models) ,
-#'  "er" (Erdos Renyi) ,"sf" (Barabasi-Albert model)
-#' Note: in this function, clusters have the same size, so N should be a multiple of m
+#' "er" (Erdos Renyi) ,"sf" (Barabasi-Albert model)
+#' Note: in this function, clusters have the same size, so N should be a multiple of k
 #' @param  param_er If method "er", probability of the ER model
 #' @param  var_homophily_ergm  Variable to account for homophily
 #' @param  coef_ergm If method "ergm", coefficients of the ERGM model
@@ -41,12 +41,20 @@ generate_clustered_networks = function(k,
       test.net <- make_empty_graph(n = cluster_size,
                                    directed = FALSE)
       test.net <- intergraph::asNetwork(test.net)
+      
+      # Extracts the column from X that will be used for homophily
       homophily_vector <- X[,var_homophily_ergm]
+      
+      # Assign homophily attributes to nodes in this cluster
       test.net%v%"homophily" =  homophily_vector[(cluster_size * i -
                                                  (cluster_size - 1)) :
                                                  (cluster_size * i) ]
+      
+      # Simulate an ERGM network
       g <- ergm::simulate_formula(test.net ~ nodematch("homophily") + edges,
                                   coef = coef_ergm)
+      
+      # Places the generated network into the correct block of the matrix
       comba[(cluster_size * i - (cluster_size - 1)) : (cluster_size * i),
             (cluster_size * i - (cluster_size - 1)) : (cluster_size * i)] <- as.matrix(g)
     }
@@ -64,13 +72,16 @@ generate_clustered_networks = function(k,
         g = igraph::sample_pa(cluster_size, directed = FALSE)
       }
 
-
+      # Converts the igraph object into an adjacency matrix
       adj <- as.matrix(igraph::as_adjacency_matrix(g))
+      
+      # Places this cluster's adjacency matrix into the appropriate block 
+      # of the full matrix
       comba[(cluster_size * i - (cluster_size - 1)) : (cluster_size * i),
             (cluster_size * i - (cluster_size - 1)) : (cluster_size * i)] <- adj
-
     }
-
   }
+  
+  # Return result
   return(comba)
 }
