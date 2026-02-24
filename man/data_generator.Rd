@@ -14,7 +14,8 @@ data_generator(
   method_networks = "er",
   param_er = 0.1,
   coef_ergm = NULL,
-  var_homophily_ergm = NULL
+  var_homophily_ergm = NULL,
+  remove_isolates = TRUE
 )
 }
 \arguments{
@@ -45,6 +46,8 @@ Note: in this function, clusters have the same size, so N should be a multiple o
 
 \item{var_homophily_ergm}{Variable to account for homophily in the "ergm"
 model (default: NULL).}
+
+\item{remove_isolates}{Logical; remove isolated nodes? (default TRUE)}
 }
 \value{
 A list of synthetic data containing:
