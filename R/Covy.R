@@ -26,41 +26,48 @@ Covy = function(w1, g1, w2, g2,
                 N, Y, W, G, p, 
                 Ne, Ne_list) {
   
+  # Initialize
   varzero = NULL
   variab = c()
   
+  # Check sufficient sample size
   if (length(which(W == w1 & G == g1)) > 1 & 
       length(which(W == w2 & G == g2)) > 1) {
     
+    # Create pairs of units
     pairs <- expand.grid.unique(which(W == w1 & G == g1),
                                 which(W == w2 & G == g2),
                                 include.equals = FALSE)
     
     for (k in 1:nrow(pairs)) {
       
+      # Get ID of i-th and k-th pair
       i=pairs[k,1]
       j=pairs[k,2]
       
+      # Check for shared neighbors
       if (shared_neigh(i, j, Ne_list = Ne_list) > 0) {
         
+        # Calculate variance component
         variab = c(varzero,
                    sum(1 / pij(i, j, w1, g1, w2, g2, Ne, Ne_list, p = p)*
                          (Y[i] / pi(i, w1, g1, p, Ne)) * 
                          (Y[j] / pi(j, w2, g2, p, Ne))) *
                      (pij(i, j, w1, g1, w2, g2, Ne, Ne_list, p = p) -
                         pi(i, w1, g1, p, Ne) * pi(j, w2, g2, p,Ne)))
-        
-      }
-      
-    }
+            }
+        }
     
+    # Calculate variance adjustment
     second_element <- sum(((Y[which(W == w1 & G == g1)]) ^ 2) / (2 * 
                                                                    pi(which(W == w1 & G == g1), w1, g1, p, Ne))) +
       sum(((Y[which(W == w2 & G == g2)]) ^ 2) / (2 * 
                                                    pi(which(W == w2 & G == g2), w2, g2, p, Ne))) 
     
-    
+    # Final covariance calculation
     covy = sum(variab) - second_element
     
-  } else {covy=NA}
+    } else {covy=NA}
+  
+  return(covy)
 }
