@@ -23,13 +23,16 @@ test_that("compute_effects_nct runs on tiny tree and returns valid output", {
   output <- "estimation"
   minsize <- 1
   
-  result <- compute_effects_nct(
-    output = output,
-    nct_partition = nct_partition,
-    N = N,
-    W = W, G = G, Y = Y, X = X,
-    Ne = Ne, Ne_list = Ne_list,
-    p = p, minsize = minsize
+  result <- expect_warning(
+    compute_effects_nct(
+      output = output,
+      nct_partition = nct_partition,
+      N = N,
+      W = W, G = G, Y = Y, X = X,
+      Ne = Ne, Ne_list = Ne_list,
+      p = p, minsize = minsize
+    ), 
+    "subpopulations not sufficiently represented"
   )
   
   expect_s3_class(result, "data.frame")
