@@ -37,13 +37,14 @@
 #' - `SETAU0100_EST`: estimated std. error of the 0100 effect in the partition.
 #'
 compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
-                             Ne, Ne_list, p, minsize){
+                             p, Ne, Ne_list, minsize){
   
   if (is.null(X) || ncol(X) == 0) {
     X <- NULL
   } else {
     X <- as.data.frame(X)
-    if (!all(grepl("^X\\.", colnames(X)))) {
+    cn <- colnames(X)
+    if (is.null(cn) || length(cn) != ncol(X) || !all(grepl("^X\\.", cn))) {
       colnames(X) <- paste0("X.", seq_len(ncol(X)))
     }
   }
