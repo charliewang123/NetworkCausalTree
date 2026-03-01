@@ -37,7 +37,7 @@
 #' - `SETAU0100_EST`: estimated std. error of the 0100 effect in the partition.
 #'
 compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
-                             p, Ne, Ne_list, minsize){
+                             Ne, Ne_list, p, minsize){
   
   if (is.null(X) || ncol(X) == 0) {
     X <- NULL
