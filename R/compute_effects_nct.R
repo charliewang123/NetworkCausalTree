@@ -39,27 +39,40 @@
 compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
                              Ne, Ne_list, p, minsize){
   
+  if (is.null(X) || ncol(X) == 0) {
+    X <- NULL
+  } else {
+    X <- as.data.frame(X)
+    cn <- colnames(X)
+    if (is.null(cn) || length(cn) != ncol(X) || !all(grepl("^X\\.", cn))) {
+      colnames(X) <- paste0("X.", seq_len(ncol(X)))
+    }
+  }
+  
+  data_est <- data.frame(idunit = 1:N, W = W, G = G, Y = Y)
+  if (!is.null(X)) data_est <- cbind(data_est, X)
+  if (!is.null(X)) {
+    colnames(data_est) <- c("idunit", "W", "G", "Y", colnames(X))
+  } else {
+    colnames(data_est) <- c("idunit", "W", "G", "Y")
+  }
+  
+  clean_filter_text = function(text) {
+    text <- gsub("data_tree", "data_est", text)
+    text <- gsub("\\bNA\\s*&\\s*", "", text)
+    text <- gsub("\\bNA\\b", "", text)
+    text <- gsub("&\\s*&", "&", text)
+    text <- gsub("^&\\s*", "", text)
+    text <- gsub("\\s*&$", "", text)
+    trimws(text)
+  }
+  
   # If output equals to "estimation", then compute the estimated conditional average
   # treatment effects and their estimated variance, in all the partitions
   # identified by the tree
   
   if (output=="estimation") {
-    
-    # Create X column names
-    if (!grepl("^X\\.", colnames(X)[1])) {
-      colnames(X) <- paste0("X.", seq_len(ncol(X)))
-    }
-    
-    # Initialize
-    data_est <- data.frame(
-      idunit = 1:N,
-      W = W,
-      G = G,
-      Y = Y
-    )
-    data_est <- cbind(data_est, X)
-    colnames(data_est) <- c("idunit","W","G","Y", colnames(X))
-    
+
     NOBS_EST <- c(rep(0,nrow(nct_partition)))
     
     EFFTAU1000 = EFFTAU1101 = EFFTAU1110 = EFFTAU0100 = c(rep(0, nrow(nct_partition)))
@@ -107,17 +120,7 @@ compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
         # Extract the filter condition
         if (!is.na(nct_partition[j, "FILTER"])) {
           
-          texts = gsub("data_tree", "data_est", nct_partition[j, "FILTER"])
-          texts <- gsub("\\bNA\\s*&\\s*", "", texts)
-
-          texts <- gsub("\\bNA\\b", "", texts)
-
-          texts <- gsub("&\\s*&", "&", texts)
-
-          texts <- gsub("^&\\s*", "", texts)
-          texts <- gsub("\\s*&$", "", texts)
-
-          texts <- trimws(texts)
+          texts <- clean_filter_text(nct_partition[j, "FILTER"])
         
           tmp <- with(data_est, eval(parse(text = texts)))
 
@@ -135,16 +138,17 @@ compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
           }
           
           this_data <- data_est[tmp, ]
+          old_ids <- this_data$idunit
           
         } else {
-          # else case: no FILTER
           this_data <- data_est
+          old_ids <- this_data$idunit
+        }
+
+        if (any(as.numeric(table(this_data$W, this_data$G)) < minsize)){
+          warning('subpopulations not sufficiently represented')
         }
         
-        old_ids <- this_data$idunit
-        new_ids <- match(old_ids, old_ids)
-        this_data$idunit <- new_ids
-
         Ne_sub <- Ne[old_ids]
 
         Ne_listsub <- lapply(old_ids, function(id) {
@@ -188,17 +192,6 @@ compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
                                                       Ne_list = Ne_listsub))
       }
     }
-
-    names(nct_partition)[names(nct_partition) == "NOBS"] <- "NOBS_TR"
-
-    nct_partition$NOBS_TR <- as.numeric(nct_partition$NOBS_TR)
-
-    nct_partition$TERMINAL <- as.character(nct_partition$TERMINAL)
-
-    names(nct_partition)[names(nct_partition) == "EFFTAU1000"] <- "EFF1000_EST"
-    names(nct_partition)[names(nct_partition) == "EFFTAU1101"] <- "EFF1101_EST"
-    names(nct_partition)[names(nct_partition) == "EFFTAU1110"] <- "EFF1110_EST"
-    names(nct_partition)[names(nct_partition) == "EFFTAU0100"] <- "EFF0100_EST"
     
     names(nct_partition)[names(nct_partition) == "SETAU1000"] <- "SE1000_EST"
     names(nct_partition)[names(nct_partition) == "SETAU1101"] <- "SE1101_EST"
@@ -212,21 +205,6 @@ compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
   # identified by the tree
   
   if (output == "detection") {
-    
-    # Create X column names
-    if (!grepl("^X\\.", colnames(X)[1])) {
-      colnames(X) <- paste0("X.", seq_len(ncol(X)))
-    }
-    
-    # Initialize
-    data_est <- data.frame(
-      idunit = 1:N,
-      W = W,
-      G = G,
-      Y = Y
-    )
-    data_est <- cbind(data_est, X)
-    colnames(data_est) <- c("idunit","W","G","Y", colnames(X))
     
     NOBS_EST = EFFTAU1000 = EFFTAU1101 = EFFTAU1110 = EFFTAU0100 = c(rep(0,nrow(nct_partition)))
     
@@ -256,17 +234,7 @@ compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
         
         if (!is.na(nct_partition[j, "FILTER"])) {
           
-          texts = gsub("data_tree", "data_est", nct_partition[j, "FILTER"])
-          texts <- gsub("\\bNA\\s*&\\s*", "", texts)
-
-          texts <- gsub("\\bNA\\b", "", texts)
-
-          texts <- gsub("&\\s*&", "&", texts)
-
-          texts <- gsub("^&\\s*", "", texts)
-          texts <- gsub("\\s*&$", "", texts)
-
-          texts <- trimws(texts)
+          texts <- clean_filter_text(nct_partition[j, "FILTER"])
           
           tmp <- with(data_est, eval(parse(text = texts)))
 
@@ -282,19 +250,16 @@ compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
           this_data <- data_est[tmp, ]
 
           old_ids <- this_data$idunit
-          new_ids <- match(old_ids, old_ids)
-          this_data$idunit <- new_ids
           
         } else {
-          # else case: no FILTER
           this_data <- data_est
+          old_ids <- this_data$idunit
         }
-      
-        if (any(as.numeric(table(this_data$W, this_data$G)) < 3)){
+        
+        if (any(as.numeric(table(this_data$W, this_data$G)) < minsize)){
           warning('subpopulations not sufficiently represented')
         }
         
-        old_ids <- this_data$idunit
         Ne_sub  <- Ne[old_ids]
         
         nct_partition$NOBS_EST[j]<-nrow(this_data)
@@ -312,19 +277,15 @@ compute_effects_nct=function(output, nct_partition, N, W, G, Y, X,
                                                   p = p[old_ids], Ne = Ne_sub)
         
       } }
-
-    names(nct_partition)[names(nct_partition) == "NOBS"] <- "NOBS_TR"
-
-    nct_partition$NOBS_TR <- as.numeric(nct_partition$NOBS_TR)
-
-    nct_partition$TERMINAL <- as.character(nct_partition$TERMINAL)
-
-    names(nct_partition)[names(nct_partition) == "EFFTAU1000"] <- "EFF1000_EST"
-    names(nct_partition)[names(nct_partition) == "EFFTAU1101"] <- "EFF1101_EST"
-    names(nct_partition)[names(nct_partition) == "EFFTAU1110"] <- "EFF1110_EST"
-    names(nct_partition)[names(nct_partition) == "EFFTAU0100"] <- "EFF0100_EST"
-    
   }
+  
+  names(nct_partition)[names(nct_partition) == "NOBS"] <- "NOBS_TR"
+  nct_partition$NOBS_TR <- as.numeric(nct_partition$NOBS_TR)
+  nct_partition$TERMINAL <- as.character(nct_partition$TERMINAL)
+  names(nct_partition)[names(nct_partition) == "EFFTAU1000"] <- "EFF1000_EST"
+  names(nct_partition)[names(nct_partition) == "EFFTAU1101"] <- "EFF1101_EST"
+  names(nct_partition)[names(nct_partition) == "EFFTAU1110"] <- "EFF1110_EST"
+  names(nct_partition)[names(nct_partition) == "EFFTAU0100"] <- "EFF0100_EST"
   
   return(nct_partition)
 }
