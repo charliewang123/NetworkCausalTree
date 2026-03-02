@@ -24,7 +24,7 @@ test_that("compute_OF_Split runs on tiny data and returns valid structure", {
   result <- compute_OF_Split(
     method = "singular",
     alpha = 1, beta = 0, gamma = 0, delta = 0,
-    N = N, W = W, G = G, Y = Y, X = X,
+    W = W, G = G, Y = Y, X = X,
     p = p, Ne = Ne, Ne_list = Ne_list,
     population_effects = pe,
     total_variance = NULL, nleafs = 1
