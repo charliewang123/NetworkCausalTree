@@ -11,11 +11,10 @@
 #' @param beta weight associated to the effect 1101
 #' @param gamma weight associated to the effect 1110
 #' @param delta weight associated to the effect 0100
-#' @param N Sample size
 #' @param W N x 1 vector, Individual Treatment
 #' @param G N x 1 vector, Neighborhood Treatment
 #' @param Y N x 1 vector, Observed Outcome
-#' @param X N x N matrix, Observed Covariate Matrix
+#' @param X N x M matrix, Observed Covariate Matrix
 #' @param p  N x 1 vector, Probability to be assigned to the active individual intervention
 #' @param Ne N x 1 vector, Degree
 #' @param Ne_list List of N elements - where N is the sample size -
@@ -30,7 +29,7 @@
 #' the third one reports the corresponding variable
 #'
 compute_OF_Split = function(method, alpha, beta, gamma, delta,
-                            N, W, G, Y, X, p, Ne, Ne_list,
+                            W, G, Y, X, p, Ne, Ne_list,
                             population_effects, total_variance, nleafs){
   
   # Initialize
@@ -44,26 +43,27 @@ compute_OF_Split = function(method, alpha, beta, gamma, delta,
   for (j in 1:dim(X)[2]) {
     
     x = X[,j]
-    split <- sort(unique(x))
-    if (length(split) > 1) {
-      splits <- (split[-1] + split[-length(split)]) / 2
+    
+    # sorted unique values
+    ux <- sort(unique(x))
+
+    if (length(ux) > 1) {
+      splits <- ux[-1]
     } else {
-      splits <- split
+      splits <- ux
     }
-    valuesx<-c()
+    
     ofx <- c()
-    namesx <- c()
     
     # Loop over all the possible splits
     
     for (i in seq_along(splits)) {
       
       sp <- splits[i]
-      
-      left_table  <- table(W[x < sp],  G[x < sp])
-      right_table <- table(W[x >= sp], G[x >= sp])
-      
-      if (any(left_table < 1) || any(right_table < 1)) {
+ 
+      # Allow splits even if some cells have zero counts
+      # Requires at least 1 obs on each side
+      if (sum(x < sp) == 0 || sum(x >= sp) == 0) {
         ofx[i] <- NA
         next
       }
