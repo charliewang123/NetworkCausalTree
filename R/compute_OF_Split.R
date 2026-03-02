@@ -63,22 +63,22 @@ compute_OF_Split = function(method, alpha, beta, gamma, delta,
  
       # Allow splits even if some cells have zero counts
       # Requires at least 1 obs on each side
-      if (sum(x < sp) == 0 || sum(x >= sp) == 0) {
+      if (sum(x < sp, na.rm = TRUE) == 0 || sum(x >= sp, na.rm = TRUE) == 0){
         ofx[i] <- NA
         next
       }
       
       ofx[i] <- 1/2 * (
         compute_OF_Value(method, alpha, beta, gamma, delta,
-                         N = sum(x <  sp), W = W[x < sp],  G = G[x < sp],  Y = Y[x < sp],
-                         Ne = Ne[x < sp], p = p[x < sp], Ne_list = Ne_list[x < sp],
+                         N = sum(!is.na(x) & x <  sp), W = W[!is.na(x) & x <  sp], G = G[!is.na(x) & x <  sp], Y = Y[!is.na(x) & x <  sp],
+                         Ne = Ne[!is.na(x) & x <  sp], p = p[!is.na(x) & x <  sp], Ne_list = Ne_list[!is.na(x) & x <  sp],
                          population_effects = population_effects,
                          nleafs = nleafs, total_variance = total_variance) +
           compute_OF_Value(method, alpha, beta, gamma, delta,
-                         N = sum(x >= sp), W = W[x >= sp], G = G[x >= sp], Y = Y[x >= sp],
-                         Ne = Ne[x >= sp], p = p[x >= sp], Ne_list = Ne_list[x >= sp],
-                         population_effects = population_effects,
-                         nleafs = nleafs, total_variance = total_variance)
+                           N = sum(!is.na(x) & x >= sp), W = W[!is.na(x) & x >= sp], G = G[!is.na(x) & x >= sp], Y = Y[!is.na(x) & x >= sp],
+                           Ne = Ne[!is.na(x) & x >= sp], p = p[!is.na(x) & x >= sp], Ne_list = Ne_list[!is.na(x) & x >= sp],
+                           population_effects = population_effects,
+                           nleafs = nleafs, total_variance = total_variance)
       )
     }
     
